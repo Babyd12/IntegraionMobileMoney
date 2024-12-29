@@ -58,7 +58,7 @@ simply configure the IPN URL as follows
 ## If you need to handle IPN calls locally:
 
 - Use an HTTPS proxy like Ngrok.
-- ## 🔗 Links
+  ## 🔗 Links
 [![Ngork](https://ngrok.com/docs/img/ngrok-black.svg)](https://ngrok.com/docs/getting-started/)
 
 
