@@ -2,8 +2,12 @@
 
 This package provides an easy integration of the PayTech payment gateway into your Laravel applications.
 
-![Logo](https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg)
-![Logo](https://paytech.sn/assets/srcs/img/new-image/paytech-7.png)
+
+
+
+<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+
+<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://paytech.sn/assets/srcs/img/logo_paytech.png" width="400" alt="Laravel Logo"></a></p>
 
 ## Installation
 
