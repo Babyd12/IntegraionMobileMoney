@@ -1,66 +1,125 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# PayTech Package for Laravel
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+This package provides an easy integration of the PayTech payment gateway into your Laravel applications.
 
-## About Laravel
+## Installation
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+```bash
+composer require mcire/paytech
+```
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+The package discovery is enabled by default in Laravel 5.5+. If you're using an earlier version, manually add the service provider and facade in `config/app.php`:
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+```php
+'providers' => [
+    // ...
+    Mcire\PayTech\PayTechServiceProvider::class,
+],
 
-## Learning Laravel
+'aliases' => [
+    // ...
+    'PayTech' => Mcire\PayTech\Facades\PayTech::class,
+],
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Configuration
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+Publish the configuration file:
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```bash
+php artisan vendor:publish --tag=config
+```
 
-## Laravel Sponsors
+Add the following variables to your `.env` file:
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```dotenv
+PAYTECH_API_KEY=your_api_key
+PAYTECH_API_SECRET=your_api_secret
+PAYTECH_ENV=test # or 'prod' for production
+PAYTECH_IPN_URL=https://your-domain.com/ipn
+PAYTECH_SUCCESS_URL=https://your-domain.com/success
+PAYTECH_CANCEL_URL=https://your-domain.com/cancel
+```
 
-### Premium Partners
+## Usage
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+### Initiating a Payment
 
-## Contributing
+```php
+use Mcire\PayTech\Facades\PayTech;
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+try {
+    $response = PayTech::requestPayment([
+        'item_name' => 'Product name',
+        'item_price' => 1000, // Price in cents
+        'currency' => 'XOF',
+        'ref_command' => Str::random(12), // Unique reference
+        'command_name' => 'Order description',
+    ]);
+    
+    // Redirect to PayTech payment page
+    return redirect($response['redirect_url']);
+} catch (\Exception $e) {
+    // Error handling
+    abort(500, $e->getMessage());
+}
+```
 
-## Code of Conduct
+### Available Parameters
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+| Parameter | Type | Description | Required |
+|-----------|------|-------------|---------|
+| item_name | string | Product name | Yes |
+| item_price | integer | Price in cents | Yes |
+| currency | string | Currency (XOF, EUR, etc.) | Yes |
+| ref_command | string | Unique order reference | Yes |
+| command_name | string | Order description | Yes |
 
-## Security Vulnerabilities
+### Handling Returns
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+The package automatically handles three types of returns:
+
+1. **IPN (Instant Payment Notification)**
+   - URL configured in `PAYTECH_IPN_URL`
+   - Server-to-server notification from PayTech
+   - Used to update order status
+
+2. **Success Page**
+   - URL configured in `PAYTECH_SUCCESS_URL`
+   - Redirection after successful payment
+
+3. **Cancel Page**
+   - URL configured in `PAYTECH_CANCEL_URL`
+   - Redirection after payment cancellation
+
+## Environments
+
+The package supports two environments:
+- test: For testing (default)
+- prod: For production
+
+Configure the environment via the `PAYTECH_ENV` variable in your `.env` file.
+
+## Security
+
+- All requests are made over HTTPS
+- API keys are securely stored in the `.env` file
+- Communications are authenticated via API_KEY and API_SECRET headers
+
+## Common Error Codes
+
+| Code | Description | Solution |
+|------|-------------|----------|
+| 400 | Invalid parameters | Check the sent parameters |
+| 401 | Authentication failed | Verify your API keys |
+| 500 | Server error | Contact PayTech support |
+
+## Support
+
+For any questions or issues:
+- Open an issue on GitHub
+- Contact PayTech support at support@paytech.sn
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This package is open-sourced software licensed under the MIT license. See the LICENSE file for more details.
