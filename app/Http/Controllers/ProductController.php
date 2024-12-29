@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use Illuminate\Support\Str;
+use Mcire\PayTech\Facades\PayTech;
 
 class ProductController extends Controller
 {
@@ -30,6 +31,22 @@ class ProductController extends Controller
      */
     public function store(StoreProductRequest $request)
     {
+
+        try {
+            $response = PayTech::requestPayment([
+                'item_name' => 'Iphone 7',
+                'item_price' => 100,
+                'currency' => 'XOF',
+                'ref_command' => Str::random(12),
+                'command_name' => 'Paiement Iphone 7 Gold via PayTech',
+            ]);
+    
+            return redirect($response['redirect_url']);
+        } catch (\Exception $e) {
+            abort(500, $e->getMessage());
+        }
+
+        /*
         $randomString = Str::random(12);
         $postfields = [
             'item_name' => 'Iphone 7',
@@ -61,7 +78,7 @@ class ProductController extends Controller
         }
 
         
-
+        */
         
     }
     public function success(){
