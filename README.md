@@ -44,6 +44,24 @@ PAYTECH_SUCCESS_URL=https://your-domain.com/success
 PAYTECH_CANCEL_URL=https://your-domain.com/cancel
 ```
 
+## Tips for configuring PayTech's IPN locally
+PayTech requires the callback route (IPN) to be accessible via HTTPS. This can pose a challenge during local development. 
+
+## If you don't need to handle IPN calls :
+
+simply configure the IPN URL as follows
+```bash
+  PAYTECH_IPN_URL=https://127.0.0.1:8000/ipn
+```
+
+
+## If you need to handle IPN calls locally:
+
+- Use an HTTPS proxy like Ngrok.
+- ## 🔗 Links
+[![Ngork](https://ngrok.com/docs/img/ngrok-black.svg)](https://ngrok.com/docs/getting-started/)
+
+
 ## Usage
 
 ### Initiating a Payment
